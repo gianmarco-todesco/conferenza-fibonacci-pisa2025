@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fibonacci sequence</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 40px;
+        }        
+        
+        #container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 300px;
+            gap: 30px;
+        }
+
+        
+        .text-container {
+            font-size: 50px;
+            font-weight: bold;
+            color: white;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            max-width: 90vw;
+            justify-content: center;
+        }
+
+        .number, .operator {
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        
+
+        button:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>    
+    <h1>Fibonacci sequence</h1>
+    
+    <div id="container"></div>
+    
+    <script src="gsap.min.js"></script>
+    <script src="TextPlugin.min.js"></script>
+    <script src="example1.js"></script>
+</body>
+</html>
