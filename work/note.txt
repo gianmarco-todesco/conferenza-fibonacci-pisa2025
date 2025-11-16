@@ -3,3 +3,25 @@ https://jmaio.github.io/mandelbrot-maps <<=!!!
 
 software manim
 
+
+https://www.reddit.com/r/math/comments/8hzh0q/the_golden_ratio_why_it_is_so_irrational/
+
+
+Slides:
+1. titolo: 11/23 => sequenza
+2. Foto di Fibonacci? 
+3. Conigli + mitosi + grafici? => rapporto vicino a phi
+4. arte. Mertz e la cosa nuova pisana
+5. Il problema del domino (cfr. bellissimo: https://www.youtube.com/watch?v=Ct7oltmdJrM)
+6. Il massimo comune demominatore; algoritmo euclideo; mostra un caso con numeri enormi
+7. Troviamo i casi in cui ci mette più tempo
+8. Queen in the corner
+9. Mandelbrot
+10. Simmetrie interne: somma dei quadrati dei numeri di Fibonacci consecutivi
+11. Somma dei primi N numeri di Fibonacci
+12. Somma dei primi quadrati
+13. Spirale
+14. Girasole
+15. Simulazione girasole
+
+
