@@ -129,6 +129,9 @@ class RabbitsSlide extends Slide {
         });
         this.countLabel.value = this.sprites.length.toString();
     }
+    nextAct() {
+        this.step();
+    }
 }
 
 
