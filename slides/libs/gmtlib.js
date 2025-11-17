@@ -33,6 +33,9 @@ class Slide {
     nextAct() {}
     prevAct() {}
     onKeyDown(event) {}
+    onPointerDown(x,y,event) {}
+    onPointerUp(event) {}
+    onPointerDrag(x,y,dx,dy,event) {}
 }
 
 
@@ -99,5 +102,30 @@ document.addEventListener("keydown", async function(event) {
         
     }
 });
+
+
+document.addEventListener('pointerdown', (e)=>{
+    let x = e.clientX;
+    let y = e.clientY;
+
+    if(slide) slide.onPointerDown(x,y,e);
+    function onPointerMove(e) {
+        let dx = e.clientX - x;
+        let dy = e.clientY - y;
+        x = e.clientX;
+        y = e.clientY;
+        if(slide) slide.onPointerDrag(x,y,dx,dy,e);
+    }
+    function onPointerUp(e) {
+        document.removeEventListener("pointermove", onPointerMove);
+        document.removeEventListener("pointerup", onPointerUp); 
+        if(slide) slide.onPointerUp(e);
+    }
+    
+    document.addEventListener("pointermove", onPointerMove);
+    document.addEventListener("pointerup", onPointerUp);
+});
+
+
 
 export {Slide, two, center};
