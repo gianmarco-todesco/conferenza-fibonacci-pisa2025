@@ -107,9 +107,11 @@ document.addEventListener("keydown", async function(event) {
 document.addEventListener('pointerdown', (e)=>{
     let x = e.clientX;
     let y = e.clientY;
+    e.preventDefault();
 
     if(slide) slide.onPointerDown(x,y,e);
     function onPointerMove(e) {
+        e.preventDefault();
         let dx = e.clientX - x;
         let dy = e.clientY - y;
         x = e.clientX;
@@ -117,6 +119,7 @@ document.addEventListener('pointerdown', (e)=>{
         if(slide) slide.onPointerDrag(x,y,dx,dy,e);
     }
     function onPointerUp(e) {
+        e.preventDefault();
         document.removeEventListener("pointermove", onPointerMove);
         document.removeEventListener("pointerup", onPointerUp); 
         if(slide) slide.onPointerUp(e);
