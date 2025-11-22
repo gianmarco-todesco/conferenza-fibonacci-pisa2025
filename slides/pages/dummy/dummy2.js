@@ -7,25 +7,25 @@ class Dummy2Slide extends Slide {
     initialize() {
     }
     start() {
-        let text = two.makeText('This is a dummy slide', center.x, center.y, {
-            size: 40,
-            family: 'Arial',
-            fill: '#000'
+        let div = this.div = document.createElement('div');
+        div.style.position = 'absolute';
+        div.style.width = '400px';
+        div.style.height = '400px';
+        div.style.top = '50px';
+        div.style.left = '50px';
+        div.style.fontSize = '80px';
+        // div.style.backgroundColor = 'rgba(255,255,255,0.5)';
+        document.body.appendChild(div);
+        katex.render("\\alpha = 2\\pi \\frac{1}{3}", div, {
+            throwOnError: false
         });
-        two.update();
-        this.text = text;
-    }           
+
+    }
+    cleanup() {
+        this.div.remove();
+    }   
+
     async end() {
-        console.log("Dummy2Slide ended");
-        let text = this.text;
-        this.text = null;
-        gsap.to(text, {
-            duration:2, opacity: 0, 
-            onUpdate() {two.update();}, 
-            onComplete() {
-                text.remove();
-            }
-        });
     }
 }
 

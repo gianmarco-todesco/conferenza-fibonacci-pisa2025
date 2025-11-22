@@ -45,8 +45,8 @@ class PointGrid {
     constructor(points) {
 
         let pts = this.pts = points.map((p,i) => {
-            let dx = p.x - center.x;
-            let dy = p.y - center.y;
+            let dx = p.x ;
+            let dy = p.y ;
             let r = Math.sqrt(dx*dx + dy*dy);
             let theta = Math.atan2(dy, dx);
             if(theta < 0) theta += 2*Math.PI;
@@ -67,7 +67,7 @@ class PointGrid {
                 j--;
             }
             let x = pts[i].x, y = pts[i].y;
-            let u = normalize( subtract( center, pts[i] ));
+            let u = normalize( subtract( {x:0,y:0}, pts[i] ));
             L.forEach( e => {
                 e.psi = getAngle( subtract( pts[e.j], pts[i] ), u);
             });
@@ -121,8 +121,8 @@ class PointGrid {
                     spiral.points.push( pts[j] );
                 }     
                 let theta = Math.atan2(
-                    spiral.points[0].y - center.y,
-                    spiral.points[1].x - center.x );
+                    spiral.points[0].y,
+                    spiral.points[1].x );
                 spiral.angle = theta;
                 spirals.push(spiral);
             }
@@ -140,19 +140,24 @@ class SunFlower extends Slide {
     initialize() {
     }
     start() {
+        this.mainGroup = two.makeGroup();
+        this.mainGroup.position.set(center.x,center.y);
+
+
         const dtheta = 2*Math.PI / ((Math.sqrt(5)+1)/2);
         let n = 2000;
         let balls = this.balls = [];
         for(let i=0; i<n; i++) {
             let phi = i * dtheta;
             let r = 12 * Math.sqrt(i);
-            let x = center.x + r * Math.cos(phi);
-            let y = center.y + r * Math.sin(phi);
+            let x = r * Math.cos(phi);
+            let y = r * Math.sin(phi);
             let ball = two.makeCircle(x,y, 3);
             ball.fill = 'white';
             ball.stroke = 'yellow';
             ball.linewidth = 1;
             balls.push(ball);
+            this.mainGroup.add(ball);
         }
         let t = performance.now();
         this.grid = new PointGrid(balls.map( b => b.position ));
@@ -216,6 +221,7 @@ class SunFlower extends Slide {
         if(this.fooGroup) this.fooGroup.remove();
         let fooGroup = two.makeGroup();
         this.fooGroup = fooGroup;
+        this.mainGroup.add(fooGroup);
         let spirals = this.grid.getSpiralsFamily(r, r + 150, j, err);
         if(spirals === null) return;
         let spiralGroups = this.spiralGroups = [];
@@ -264,34 +270,19 @@ class SunFlower extends Slide {
             opacity: 1,
             stagger: 0.01,
         }); 
-        /*
-        let circle = two.makeCircle(center.x, center.y, r);
-        circle.fill = 'none';
-        circle.stroke = 'black';
-        circle.linewidth = 1;
-        fooGroup.add(circle);
-        */
-        /*
-        let psi = this.grid.pts[index+1].theta;
-        let ii = [index];
-        let i = index;
-        while(i + 1 < this.grid.pts.length && Math.abs(this.grid.pts[i+1].psi - psi) < err) {
-            ii.push(++i);
-        }
-        i = index;       
-        while(i - 1 >=0 && Math.abs(this.grid.pts[i-1].psi - psi) < err) {
-            ii.push(--i);
-        }
-        this.grid.pts.forEach(p=>p.valid = false);
-        ii.forEach( i => {
-            this.grid.pts[i].valid = true;
-            this.grid.pts[i].leader = true;
-        });
-        ii.forEach( i => {
-            let p = this.grid.pts[i];
-            p.neighbors.forEach( e => {
+        
+        let number = two.makeText(`${spirals.length}`, 0,0,
+            {
+                size: 60, family: 'arial',
+                alignment: 'center',
+                weight: 'bold'
+            });
+        number.fill = 'white';
+        number.stroke = 'black';
+        number.opacity = 0.0;
+        fooGroup.add(number);
+        gsap.to(number, {opacity : 1, duration: 1, delay: 1.5});
 
-                if(!this.grid.pts[e.j].valid) */
     }
 
     start2() {
@@ -355,7 +346,9 @@ class SunFlower extends Slide {
     }
     async end() {
     }
-
+    cleanup() {
+        this.mainGroup.remove();
+    }
 
     onKeyDown(event) {
         if(event.key === '0') {
@@ -366,6 +359,10 @@ class SunFlower extends Slide {
             this.foo(100,3,0.1)
         } else if(event.key === '3') {
             this.foo(300,0,0.1)
+        } else if(event.key === '4') {
+            this.foo(300,2,0.1)
+        } else if(event.key === '5') {
+            this.foo(300,1,0.1)
         }
     }
     nextAct() {

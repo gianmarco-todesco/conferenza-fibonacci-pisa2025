@@ -77,14 +77,43 @@ class SunFlower1 extends Slide {
         const r0 = this.r0 = 18.0;
         this.ticker = this.update.bind(this);
         const me = this;
-        gsap.ticker.add( (time, deltaTime) => { 
-            me.update(time, deltaTime); 
-        } );
-        //gsap.ticker.add( (time, deltaTime) => {
-        //    
+        function ticker(time, deltaTime) {
+            // console.log("ticker:", time);
+            if(me.ticker) me.update(time, deltaTime); 
+        }
+        gsap.ticker.add(ticker);
+        this.ticker = ticker;
+
+        let div = this.div = document.createElement('div');
+        div.style.position = 'absolute';
+        div.style.width = '400px';
+        div.style.height = '400px';
+        div.style.top = '50px';
+        div.style.left = '50px';
+        div.style.fontSize = '60px';
+        div.style.color = 'white';
+        // div.style.backgroundColor = 'rgba(255,255,255,0.5)';
+        document.body.appendChild(div);
+        //katex.render("\\alpha = 2\\pi \\frac{1}{3}", div, {
+        //    throwOnError: false
         //});
+        this.updateAlphaDisplay("\\frac{1}{3}");
     }
     async end() {
+    }
+    cleanup() {
+        if(this.ticker) {
+            gsap.ticker.remove(this.ticker);
+            this.ticker = null;
+        }
+        this.mainGroup.remove();
+        this.div.remove();
+    }
+
+    updateAlphaDisplay(s) {
+        katex.render('\\alpha = 360°' + s, this.div, {
+            throwOnError: false
+        });
     }
 
     set alpha(alpha) {
@@ -114,6 +143,7 @@ class SunFlower1 extends Slide {
         ball.userData = {
             cs,sn,t:time
         };
+        this.mainGroup.add(ball);
         this.balls.push(ball);
     }
 
@@ -123,8 +153,8 @@ class SunFlower1 extends Slide {
             let cs = b.userData.cs;
             let sn = b.userData.sn;
             let r = this.r0 + Math.sqrt(age) * 20;
-            b.position.x = center.x + cs * r;
-            b.position.y = center.y + sn * r;
+            b.position.x = cs * r;
+            b.position.y = sn * r;
         });
         this.theta += 0.005 * deltaTime;
         if(this.theta > this.theta1 && this.balls.length  < 5000) {
@@ -138,15 +168,22 @@ class SunFlower1 extends Slide {
 
         } else if(event.key === '1') {
            this.alpha = 1/3
+           this.updateAlphaDisplay("\\frac{1}{3}");
         } else if(event.key === '2') {
            this.alpha = 1/4            
+           this.updateAlphaDisplay("\\frac{1}{4}"); 
         } else if(event.key === '3') {
            this.alpha = 3/7            
+           this.updateAlphaDisplay("\\frac{3}{7}"); 
         } else if(event.key === '4') {
            this.alpha = 10/37        
-        
+           this.updateAlphaDisplay("\\frac{10}{37}"); 
         } else if(event.key === '5') {
-           this.alpha = Math.PI       
+           this.alpha = 1/Math.PI       
+           this.updateAlphaDisplay("\\frac{1}{\\pi}"); 
+        } else if(event.key === '6') {
+           this.alpha = 2/(1 + Math.sqrt(5))       
+           this.updateAlphaDisplay("\\frac{1}{\\phi}"); 
         }
     }
     nextAct() {

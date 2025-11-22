@@ -74,6 +74,8 @@ async function setSlide(index) {
         slide = slides[slideIndex];
         console.log("Ending slide ", slideIndex, slide.name);
         await slide.end();
+        if(slide.ticker) gsap.ticker.remove(slide.ticker); 
+        slide.ticker = null;
         slide.cleanup();
     }
     slideIndex = index;
@@ -82,11 +84,26 @@ async function setSlide(index) {
         console.log("Starting slide ", slideIndex, slide.name);
 
         slide.start();
+        if(slide.update) {
+            const thisSlide = slide;
+            function ticker(time, deltaTime) {
+                // console.log("ticker:", thisSlide.name, time);
+                if(thisSlide.ticker) thisSlide.update(time, deltaTime); 
+            }
+            slide.ticker = ticker;
+            gsap.ticker.add(slide.ticker);
+        }
     } else {
         slide = null;
     }   
     window.location.hash = `#${slideIndex}`;
     window.slide = slide;
+}
+
+function nextSlide() {
+    if(0 <= slideIndex && slideIndex < slides.length - 1) {
+        setSlide(slideIndex + 1);
+    }
 }
 
 document.addEventListener("keydown", async function(event) {
@@ -138,4 +155,4 @@ document.addEventListener('pointerdown', (e)=>{
 
 
 
-export {Slide, two, center};
+export {Slide, two, center, nextSlide};

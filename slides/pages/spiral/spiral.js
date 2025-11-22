@@ -353,7 +353,7 @@ class ASpiral extends Slide {
 
         const p0 = this.rects[0].topRight();
         this._p5 = p0;
-        const r0 =norm(p0);        
+        const r0 = norm(p0);        
         const theta0 = Math.atan2(p0.y,p0.x);
 
         let i = 4*Math.floor((this.rects.length-1)/4);
@@ -362,7 +362,7 @@ class ASpiral extends Slide {
         const theta1 = Math.atan2(p1.y,p1.x) + Math.PI * 2 * i / 4;
         this._p6 = p1;
 
-        const param =  Math.log(r1/r0)/(theta1-theta0);
+        const param = this.isGolden ? Math.log(r1/r0)/(theta1-theta0) : Math.log(2)/Math.PI;
 
         const theta_a = theta0; 
 
@@ -372,6 +372,7 @@ class ASpiral extends Slide {
         
         const theta_b = theta0 + (theta1 - theta0) * this.spiralLength; // Math.min(maxTheta, theta_a + this._spiralLength);
 
+        const rr0 = this.isGolden ? r0 : r0 / Math.sqrt(2);
         
         this.spiral.vertices.forEach((v,i) => {
             let t = 2 * i / this.spiral.vertices.length;
@@ -379,25 +380,12 @@ class ASpiral extends Slide {
             if(t>1) { t = 2-t; side = -1; }
 
             let theta = theta_a * (1-t) + theta_b * t;
-            let r = r0 * Math.exp(param * (theta-theta0) + side*thickness);
+            let r = rr0 * Math.exp(param * (theta-theta0) + side*thickness);
             
             v.x = this._center.x + this._scale * r * Math.cos(theta);
             v.y = this._center.y + this._scale * r * Math.sin(theta);
         });
-        // console.log("Spiral update time:", performance.now() - start);
-        /*
         
-        let ball = this.balls[0];
-        ball.position.set(c.x + this._scale * p0.x, c.y + this._scale * p0.y);
-        for(let i=1;i<this.balls.length;i++) {
-            let t = theta0 + (i-1) * 0.1;
-            let a = r0 * Math.exp(param * (t-theta0)); // Math.exp(k*Math.PI*2) =
-            let x = a * Math.cos(t);
-            let y = a * Math.sin(t);
-            let ball = this.balls[i];
-            ball.position.set(c.x + this._scale * x, c.y + this._scale * y);
-        }
-        */
 
     }
 
@@ -527,6 +515,7 @@ class ASpiral extends Slide {
         textStyle.alignment = 'left';
         txt = two.makeText(ylabel, x + 20, (p1.y + p2.y)/2, textStyle);
         g.add(txt);
+        this.dimensionLine = g;
         /*
         let txt = two.makeText(`${rect.lx.toFixed(2)}`, (x0+x1)/2, y + 10, {
             size: 20,
@@ -536,10 +525,7 @@ class ASpiral extends Slide {
         */
     }
 
-    create
-
-    initialize() {
-    }
+    
     start() {
 
         this._scale = 40;
@@ -559,7 +545,8 @@ class ASpiral extends Slide {
         this.line1.visible = false;
         this.line2.visible = false;
         this.line3.visible = false;
-        
+        this._hideText = false;
+
         
         
         this._updateGeometry();
@@ -576,6 +563,10 @@ class ASpiral extends Slide {
             r.textElement = null;
         });
         this.spiral = null;
+        if(this.scaleTicker) {
+            gsap.ticker.remove(this.scaleTicker);
+            this.scaleTicker = null;
+        }
     }
 
     onPointerDrag(x,y,dx,dy,event) {
@@ -588,7 +579,10 @@ class ASpiral extends Slide {
     set scale(v) {
         // if(v<0.01) v*=4.0;
         // if(v<0.01) v*=this.scalePeriod;
-
+        if(this.dimensionLine) {
+            this.dimensionLine.remove();
+            this.dimensionLine = null;
+        }
 
         if(v != this._scale) {
             this._scale = v;
@@ -632,7 +626,10 @@ class ASpiral extends Slide {
 
     onKeyDown(event) {
         if(event.key == 's') {
-            this.showSpiral();
+            if(!this.spiral || !this.spiral.visible)
+                this.showSpiral();
+            else
+                this.hideSpiral();
         } else if(event.key == 'p') {
             this.foo();
         } else if(event.key == 'l') {
