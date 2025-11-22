@@ -7,28 +7,34 @@ class TitleSlide extends Slide {
     initialize() {
     }
     start() {
-        let mainGroup = this.mainGroup = two.makeGroup();
-        mainGroup.position.set(center.x, center.y); 
-
+        let mainGroup = this.mainGroup;
         let title = this.title = two.makeText(
             'Fibonacci', 
-            0,-80, {size: 90, family: 'Arial', fill: 'white', weight: 'bold'
+            0,-150, {
+                size: 200, 
+                family: 'Arial', 
+                fill: 'white',
+                // stroke: 'black',
+                linewidth: 2.0,
+                weight: 'bold'
         });
         mainGroup.add(title);
         let subtitle = this.title = two.makeText(
             'Numeri fantastici e dove trovarli', 
-            0,0, {size: 40, family: 'Arial', fill: 'white', weight: 'bold'
+            0,0, {size: 60, 
+                family: 'Arial', 
+                fill: 'white', 
+                weight: 'bold'
         });
         mainGroup.add(subtitle);
         let contact = this.contact = two.makeText(
             'Gian Marco Todesco - gianmarco.todesco@gmail.com',
-            0,80, {size: 20, family: 'Arial', fill: '#BBB', weight: 'bold'
+            0,120, {size: 35, family: 'Arial', fill: '#BBB', weight: 'bold'
         });
         mainGroup.add(contact);
 
     }
     cleanup() {
-        this.mainGroup.remove();
     }
     async end() {
 

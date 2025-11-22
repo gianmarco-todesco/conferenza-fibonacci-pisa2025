@@ -8,6 +8,9 @@ let container;
 let two;
 let center; 
 
+const BASE_WIDTH  = 1920;
+const BASE_HEIGHT = 1080;
+
 class Slide {
     constructor(name) {
         this.name = name;
@@ -38,9 +41,16 @@ class Slide {
     onPointerDrag(x,y,dx,dy,event) {}
 }
 
+function resizeContainer() {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const scale = Math.min(w / BASE_WIDTH, h / BASE_HEIGHT);
+    container.style.transform =
+      `translate(-50%, -50%) scale(${scale})`;
+}
 
 document.addEventListener("DOMContentLoaded", async function() {
-
+    
     let firstSlideIndex = 0;
     let hpage = window.location.hash.slice(1);
     if(hpage != '') {
@@ -55,19 +65,26 @@ document.addEventListener("DOMContentLoaded", async function() {
 
     container = document.getElementById('container');
     const containerRect = container.getBoundingClientRect();
+
+    resizeContainer(); 
     
     two = window.two = new Two({
-        width: containerRect.width,
-        height: containerRect.height
+        width: BASE_WIDTH, // containerRect.width,
+        height: BASE_HEIGHT, // containerRect.height
     }).appendTo(container);
-    center = window.center = {x:containerRect.width / 2, y: containerRect.height / 2};
-    
 
+
+    center = window.center = { x: BASE_WIDTH / 2,  y: BASE_HEIGHT / 2};
+    
     gsap.ticker.add(two.update.bind(two))
 
     slides.forEach(slide => slide.initialize());
     await setSlide(firstSlideIndex);
 });
+
+
+window.addEventListener('resize', resizeContainer);
+
 
 async function setSlide(index) {
     if(0 <= slideIndex && slideIndex < slides.length) {
@@ -77,13 +94,21 @@ async function setSlide(index) {
         if(slide.ticker) gsap.ticker.remove(slide.ticker); 
         slide.ticker = null;
         slide.cleanup();
+        if(slide.mainGroup) {
+            slide.mainGroup.remove();
+            slide.mainGroup = null;
+        }
     }
     slideIndex = index;
     if(0 <= slideIndex && slideIndex < slides.length) {
         slide = slides[slideIndex];
         console.log("Starting slide ", slideIndex, slide.name);
 
+        slide.mainGroup = two.makeGroup();
+        slide.mainGroup.position.set(center.x, center.y);
+        
         slide.start();
+
         if(slide.update) {
             const thisSlide = slide;
             function ticker(time, deltaTime) {
