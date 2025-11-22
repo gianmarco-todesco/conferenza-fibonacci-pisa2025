@@ -7,33 +7,28 @@ class TitleSlide extends Slide {
     initialize() {
     }
     start() {
-        let title = two.makeText('Fibonacci: numeri fantastici e dove trovarli', 
-            center.x, center.y, {
+        let mainGroup = this.mainGroup = two.makeGroup();
+        mainGroup.position.set(center.x, center.y); 
+
+        let title = this.title = two.makeText('Fibonacci: numeri fantastici e dove trovarli', 
+            0,0, {
                 size: 40,
                 family: 'Arial',
                 fill: 'yellow',
                 weight: 'bold'
         });
-
+        mainGroup.add(title);
 
     }
     cleanup() {
-        document.body.removeChild(this.div);
-        this.div = null;
-        this.text.remove();
-        this.text = null;
+        this.mainGroup.remove();
     }
     async end() {
 
         let tl = gsap.timeline();
-        this.div.style.opacity = 1;
-        tl.to(this.text, {duration :1, opacity: 0}, 0);
-        tl.to(this.div.style, {duration :1, opacity: 0}, 0);
+        tl.to(this.title, {duration :1, opacity: 0}, 0);
         
-        let promise = new Promise((resolve) => {
-            tl.eventCallback("onComplete", resolve);
-        });
-        await promise;
+        return tl;
     }
 }
 

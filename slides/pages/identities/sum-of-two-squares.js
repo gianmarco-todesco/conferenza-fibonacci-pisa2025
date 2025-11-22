@@ -18,9 +18,9 @@ class TextLine {
     }
 }
 
-class SumOfSquaresSlide extends Slide {
+class TwoSquaresSumSlide extends Slide {
     constructor() {
-        super("SumOfSquares");
+        super("TwoSquaresSum");
     }   
     initialize() {
     }
@@ -46,11 +46,12 @@ class SumOfSquaresSlide extends Slide {
         fibTextLine.group.position.set(-300,-100);
         
         for(let i=3; i<10; i++) {
-            let s = 1
-            let ts = ["1²"];
-            for(let j=1;j<i;j++) { ts.push('+',`${fibs[j]}²`); s += fibs[j]**2}
-            ts.push("=", `${s}`);
-            ts.push("=", `${fibs[i]}*${fibs[i+1]}`);
+            let a = fibs[i], b = fibs[i+1];
+            let a2 = a*a, b2 = b*b;
+            let s = a2 + b2;    
+            let ts = [`${fibs[i]}²`, '+', `${fibs[i+1]}²`, 
+                '=', `${a2}`, '+', `${b2}`, 
+                "=", `${s}`]
             let sumTextLine = new TextLine(ts, textSytle);
             textLines.push(sumTextLine);
             mainGroup.add(sumTextLine.group);
@@ -68,5 +69,5 @@ class SumOfSquaresSlide extends Slide {
     }
 }
 
-let t = new SumOfSquaresSlide();
+let t = new TwoSquaresSumSlide();
 

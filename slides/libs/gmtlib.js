@@ -2,7 +2,7 @@
 "use strict";
 
 let slides = [];
-let slideIndex = 0;
+let slideIndex = -1;
 let slide; 
 let container;
 let two;
@@ -39,7 +39,16 @@ class Slide {
 }
 
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", async function() {
+
+    let firstSlideIndex = 0;
+    let hpage = window.location.hash.slice(1);
+    if(hpage != '') {
+        let j = hpage|0;
+        if(0<=j && j<slides.length) {
+            firstSlideIndex = j;
+        }
+    }
 
     gsap.registerPlugin(TextPlugin) 
     gsap.registerPlugin(SplitText) 
@@ -57,28 +66,26 @@ document.addEventListener("DOMContentLoaded", function() {
     gsap.ticker.add(two.update.bind(two))
 
     slides.forEach(slide => slide.initialize());
-    if(slides.length > 0) {
-        slides[0].start();
-        slide = slides[0];
-    } else {
-        slide = null;
-    }
-    window.slide = slide;
+    await setSlide(firstSlideIndex);
 });
 
 async function setSlide(index) {
     if(0 <= slideIndex && slideIndex < slides.length) {
         slide = slides[slideIndex];
+        console.log("Ending slide ", slideIndex, slide.name);
         await slide.end();
         slide.cleanup();
     }
     slideIndex = index;
     if(0 <= slideIndex && slideIndex < slides.length) {
         slide = slides[slideIndex];
+        console.log("Starting slide ", slideIndex, slide.name);
+
         slide.start();
     } else {
         slide = null;
     }   
+    window.location.hash = `#${slideIndex}`;
     window.slide = slide;
 }
 

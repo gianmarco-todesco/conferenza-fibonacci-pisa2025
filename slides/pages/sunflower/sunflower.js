@@ -76,6 +76,60 @@ class PointGrid {
             
         }
     }
+
+
+
+    getSpiralsFamily(r, rmax, j, err = 0.1) {
+        const pts = this.pts;
+        let index = 0;
+        while(index+1<pts.length && pts[index+1].r < r)
+            index++;
+        let neighbours = pts[index].neighbors;
+        if(!(0<=j && j<neighbours.length)) return null;
+        let psi = neighbours[j].psi;
+        let links = {}
+        let selected = new Set();
+        let followers = new Set();  
+        while(index+1 < pts.length)
+        {
+            index++;
+            let p = pts[index];
+            if(p.r > rmax) break;
+            let minPsiErr = err;  
+            let newPsi = psi;    
+            let j = -1;      
+            p.neighbors.forEach( e => {
+                let dpsi = Math.abs(e.psi - psi);
+                if(dpsi < minPsiErr) { minPsiErr = dpsi; newPsi = e.psi; j = e.j; }
+            });
+            if(j<0) break;
+            psi = newPsi;
+            links[index] = j;
+            selected.add(index);
+            selected.add(j);
+            followers.add(j);
+        }
+        let count = 0;
+        let spirals = [];
+        for(let i of selected) {
+            if(!followers.has(i)) {
+                let spiral = {};
+                let j = i;
+                spiral.points = [pts[j]];
+                while( links[j] !== undefined ) {
+                    j = links[j];
+                    spiral.points.push( pts[j] );
+                }     
+                let theta = Math.atan2(
+                    spiral.points[0].y - center.y,
+                    spiral.points[1].x - center.x );
+                spiral.angle = theta;
+                spirals.push(spiral);
+            }
+        }
+        spirals.sort( (a,b) => a.angle - b.angle );
+        return spirals; 
+    }
 }
 
 class SunFlower extends Slide {
@@ -103,7 +157,7 @@ class SunFlower extends Slide {
         let t = performance.now();
         this.grid = new PointGrid(balls.map( b => b.position ));
         console.log("PointGrid time:", performance.now() - t);
-
+        
         
         /*
         let i0 = this.grid.pts.length-1;
@@ -158,60 +212,65 @@ class SunFlower extends Slide {
         */
     }
 
-    foo(r, psi, err = 0.1) {
+    foo(r, j, err = 0.1) {
         if(this.fooGroup) this.fooGroup.remove();
         let fooGroup = two.makeGroup();
         this.fooGroup = fooGroup;
+        let spirals = this.grid.getSpiralsFamily(r, r + 150, j, err);
+        if(spirals === null) return;
+        let spiralGroups = this.spiralGroups = [];
+        let uffa = [];
+        spirals.forEach( (spiral,i) => {
+            let spiralGroup = two.makeGroup();
+            // spiralGroup.opacity = 0;
+            fooGroup.add(spiralGroup);
+            spiralGroups.push(spiralGroup);
+            let vertices = [];
+            spiral.points.forEach( p => {
+                vertices.push( new Two.Anchor(p.x, p.y) );
+            });
+            let path = two.makePath(vertices);
+            path.closed = false;
+            path.stroke = `hsl(${i*360/spirals.length}, 100%, 50%)`;
+            path.fill = 'none';
+            path.linewidth = 2; 
+            spiralGroup.add(path);  
+            path.opacity = 0.0;
+            uffa.push(path);   
+            let j = spiral.points.length - 1;
+            let dot = two.makeCircle(
+                spiral.points[0].x, spiral.points[0].y, 12);
+            dot.fill = "white";
+            dot.stroke = 'orange';
+            dot.linewidth = 2;
+            dot.opacity = 0.0;
+            uffa.push(dot);
+            spiralGroup.add(dot);
+            let label = two.makeText(
+                `${i+1}`, 
+                spiral.points[0].x, spiral.points[0].y,
+            {
+                size: 16, family: 'arial',
+                alignment: 'center',
+                weight: 'bold'
+            });
+            label.fill = 'black';
+            spiralGroup.add(label);
+            label.opacity = 0.0;
+            uffa.push(label);
+        });
+        gsap.to(uffa, {
+            duration: 1,
+            opacity: 1,
+            stagger: 0.01,
+        }); 
+        /*
         let circle = two.makeCircle(center.x, center.y, r);
         circle.fill = 'none';
         circle.stroke = 'black';
         circle.linewidth = 1;
         fooGroup.add(circle);
-        let index = 0;
-        while(index+1<this.grid.pts.length && this.grid.pts[index+1].r < r)
-            index++;
-        console.log(this.grid.pts[index].neighbors.map(e=>e.psi));
-        let links = {}
-        let selected = new Set();
-        let followers = new Set();  
-        while(index+1 < this.grid.pts.length)
-        {
-            index++;
-            let p = this.grid.pts[index];
-            let minPsiErr = err;      
-            let j = -1;      
-            p.neighbors.forEach( e => {
-                let dpsi = Math.abs(e.psi - psi);
-                if(dpsi < minPsiErr) {
-                    minPsiErr = dpsi;
-                    j = e.j;
-                }
-            });
-            if(j<0) break;
-            let p0 = this.grid.pts[index];
-            let p1 = this.grid.pts[j];
-            let line = two.makeLine(p0.x, p0.y, p1.x, p1.y);
-            line.stroke = 'blue';
-            line.linewidth = 2;
-            fooGroup.add(line);
-            links[index] = j;
-            selected.add(index);
-            selected.add(j);
-            followers.add(j);
-        }
-        let count = 0;
-        for(let i of selected) {
-            if(!followers.has(i)) {
-                let dot = two.makeCircle(this.grid.pts[i].x, this.grid.pts[i].y, 4);
-                dot.fill = 'red';
-                dot.stroke = 'orange';
-                dot.linewidth = 2;
-                fooGroup.add(dot);
-                count++;
-            }
-        }
-        console.log("count=", count);
-
+        */
         /*
         let psi = this.grid.pts[index+1].theta;
         let ii = [index];
@@ -297,6 +356,18 @@ class SunFlower extends Slide {
     async end() {
     }
 
+
+    onKeyDown(event) {
+        if(event.key === '0') {
+
+        } else if(event.key === '1') {
+            this.foo(100,2,0.1)
+        } else if(event.key === '2') {
+            this.foo(100,3,0.1)
+        } else if(event.key === '3') {
+            this.foo(300,0,0.1)
+        }
+    }
     nextAct() {
         this.foo(this.index);
         this.index--;

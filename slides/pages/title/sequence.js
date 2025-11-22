@@ -9,14 +9,17 @@ class SequenceSlide extends Slide {
     initialize() {
     }
     start() {
-        
+        let mainGroup = this.mainGroup = two.makeGroup();
+        mainGroup.position.set(center.x, center.y); 
+
         let title = this.title = two.makeText('Fibonacci Day : 23 ottobre',
-            center.x, center.y - 30, {
+            0, -30, {
                 size: 40,
                 family: 'Arial',
                 fill: 'yellow',
                 weight: 'bold'
         });
+        mainGroup.add(title);
 
         const textStyle = this.textStyle = {
                     size: 50,   
@@ -25,6 +28,7 @@ class SequenceSlide extends Slide {
                     weight: 'bold'
             }
         let group = this.group = two.makeGroup();
+        mainGroup.add(group);
         let cc = ["1","1","/","2","3"];
         for(let i=0; i<cc.length; i++) {
             let c = cc[i];
@@ -33,9 +37,8 @@ class SequenceSlide extends Slide {
         }
         this.slash = group.children[2];
         this.numbers = [0,1,3,4].map(i => group.children[i]);
-        group.position.y = center.y + 50;
-        group.position.x = center.x;
-        window.group = group;
+        group.position.y = 50;
+        group.position.x = 0;
 
         this.plus = two.makeText("+", 0,0, textStyle);
         this.equal = two.makeText("=", 0,0, textStyle);
@@ -48,18 +51,15 @@ class SequenceSlide extends Slide {
         this.act = 0;
         two.update();
         this.fib = [1,1,2,3];
+
+        let sprite = this.sprite = two.makeSprite('/slides/assets/Fibonacci2.jpg', 0, 0);
+        mainGroup.add(sprite);
+        sprite.scale = 0.2;
+        sprite.position.set(0, -300);
     }
     cleanup() {
-        this.numbers.forEach(num => num.remove());
-        this.plus.remove();
-        this.equal.remove();
-        this.title.remove();
-        this.group.remove();
-        this.numbers = null;
-        this.plus = null;
-        this.equal = null;
-        this.title = null;
-        this.group = null;
+        this.mainGroup.remove();
+        
     }
     async end() {
         /*
