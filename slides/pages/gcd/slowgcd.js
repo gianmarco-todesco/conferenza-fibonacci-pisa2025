@@ -115,12 +115,12 @@ class SlowGcd extends Slide {
                 txt.fill = 'blue';
                 txt.opacity = 0;
                 tl.to(txt, {opacity:1, duration:0.1});
-                tl.to(txt.position, {x:50, y: 50 + k * 30, duration: 0.2}, 'tb'+lineIndex);
-                tl.to(line.textSpans[0], {fill: 'white', duration: 0.5}, 'tb'+lineIndex);
+                tl.to(txt.position, {x:50, y: 50 + k * 30, duration: 0.1}, 'tb'+lineIndex);
+                tl.to(line.textSpans[0], {fill: 'white', duration: 0.1}, 'tb'+lineIndex);
                 k++;
             }
-            if(lineIndex > 2) {
-               tl.to(group.position, {y: -80 * (lineIndex-2), duration: 0.5});
+            if(lineIndex > 12) {
+               tl.to(group.position, {y: -80 * (lineIndex-12), duration: 0.1});
             }
             
         });

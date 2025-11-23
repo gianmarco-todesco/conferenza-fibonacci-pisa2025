@@ -6,9 +6,10 @@ const adultSize = 0.04;
 
 
 class RabbitsSlide extends Slide {
-    constructor() {
+    constructor(areRabbits = true) {
         super("Rabbits");
         this.started = false;
+        this.areRabbits = areRabbits;
     }   
     initialize() {
     }
@@ -42,10 +43,19 @@ class RabbitsSlide extends Slide {
         let node1 = this.addNode("", false);
         // this.updateLayoutTicker = gsap.ticker.add(this.updateLayout.bind(this));
         this.createPanel();
+        if(!this.areRabbits) {
+            this.title = two.makeText("Mitosi cellulare", 0, -450, {
+                size: 80,
+                family: 'Arial',
+                fill: 'white',
+                weight: 'bold'
+            });
+            this.mainGroup.add(this.title);
+        }
     }
 
     createPanel() {
-        let div = document.createElement('div');
+        let div = this.table = document.createElement('div');
         div.style.position = 'absolute';
         div.style.width = '230px';
         div.style.height = '600px';
@@ -124,6 +134,7 @@ class RabbitsSlide extends Slide {
             this.layout.dispose();
             this.layout = null;
         }        
+        this.table.remove();
     }
     async end() {
     }
@@ -150,20 +161,37 @@ class RabbitsSlide extends Slide {
 
     
     addNode(parentId = "", isBaby = true) {
-        let spritePair = two.makeGroup();
-        let sprite2 = two.makeSprite('/slides/assets/rabbit-pair-2-white.png', 0, 0);
-        spritePair.add(sprite2);
-        let sprite = two.makeSprite('/slides/assets/rabbit-pair-2.png', 0, 0);
-        spritePair.add(sprite);
-        if(isBaby) {
-            sprite2.opacity = 1.0;
-            sprite.opacity = 0.0;
+        let spritePair;
+        if(this.areRabbits === false) {
+            spritePair = two.makeGroup();
+            let circle = two.makeCircle(0,0,40);
+            circle.fill = 'white';
+            circle.stroke = 'black';
+            circle.linewidth = 4;
+            spritePair.add(circle);
+            let core = two.makeCircle((Math.random()-0.5)*10,(Math.random()-0.5)*10,30);
+            core.fill = 'orange';
+            core.stroke = 'black';
+            circle.linewidth = 2;
+            
+            spritePair.add(core);            
+            isBaby = false;
         } else {
-            sprite.opacity = 1.0;
-            sprite2.opacity = 0.0;
+            spritePair = two.makeGroup();
+            let sprite2 = two.makeSprite('/slides/assets/rabbit-pair-2-white.png', 0, 0);
+            spritePair.add(sprite2);
+            let sprite = two.makeSprite('/slides/assets/rabbit-pair-2.png', 0, 0);
+            spritePair.add(sprite);
+            if(isBaby) {
+                sprite2.opacity = 1.0;
+                sprite.opacity = 0.0;
+            } else {
+                sprite.opacity = 1.0;
+                sprite2.opacity = 0.0;
 
+            }
+            spritePair.scale = isBaby ? babySize : adultSize;
         }
-        spritePair.scale = isBaby ? babySize : adultSize;
         this.sprites.push(spritePair);
         let nodeId = 'node' + this.nextNodeId++;
         this.graph.addNode(nodeId, {
@@ -242,5 +270,6 @@ class RabbitsSlide extends Slide {
 }
 
 
-let rabbitsSlide = new RabbitsSlide();  
+let rabbitsSlide = new RabbitsSlide(true);  
+let cellsSlide = new RabbitsSlide(false);  
 
