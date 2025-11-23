@@ -25,14 +25,29 @@ class TwoSquaresSumSlide extends Slide {
     initialize() {
     }
     start() {
-        let mainGroup = this.mainGroup = two.makeGroup();
-        mainGroup.position.set(center.x, center.y); 
+        let mainGroup = this.mainGroup; 
+
+
+        let div = this.div = document.createElement('div');
+        div.style.position = 'absolute';
+        div.style.top = '40px';
+        div.style.left = '0px';
+        div.style.width = '100%';
+        div.style.fontSize = '30px';
+        div.style.color = 'white';
+        div.style.textAlign = 'center';
+        document.body.appendChild(div);
+        katex.render(
+            "F_{k}^2 + F_{k+1}^2 = ?",  // F_{k} \\cdot F_{k+1}
+                div, { throwOnError: false });
+
+
 
         let line = two.makeGroup();
         mainGroup.add(line);
 
         const textSytle = {
-            size: 40,
+            size: 60,
             family: 'Arial',
             fill: 'white',
             weight: 550
@@ -63,6 +78,7 @@ class TwoSquaresSumSlide extends Slide {
     }
     cleanup() {
         this.mainGroup.remove();
+        this.div.remove();
     }
     async end() {
  

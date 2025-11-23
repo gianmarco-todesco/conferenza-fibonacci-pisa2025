@@ -25,8 +25,10 @@ class SumOfSquaresSlide extends Slide {
     initialize() {
     }
     start() {
-        let mainGroup = this.mainGroup = two.makeGroup();
-        mainGroup.position.set(center.x, center.y); 
+        let mainGroup = this.mainGroup;
+        
+
+        
 
         let line = two.makeGroup();
         mainGroup.add(line);

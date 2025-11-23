@@ -1,5 +1,7 @@
 import {Slide, two, center} from '../../libs/gmtlib.js';   
 
+const CELLSIZE = 30;
+const ROWSIZE = 35;
 
 function createBoard(cellSize, colsCount, withBG=true) {  
     // Parametri configurabili
@@ -69,19 +71,28 @@ function createTile(cellSize, colsCount) {
     const height = cellSize;
 
     // sfondo arrotondato (disegnato prima)
+    const tileGroup = two.makeGroup();
     const tile = two.makeRoundedRectangle(
         0, 0, width-borderWidth, height-borderWidth, borderRadius);
     tile.fill = bgColor;
     tile.stroke = borderColor;
     tile.linewidth = borderWidth;
+    tileGroup.add(tile);
+    if(colsCount == 2) {
+        const line = two.makeLine(0, -height/2, 0, height/2);
+        line.stroke = gridColor;
+        line.linewidth = gridLineWidth;
+        tileGroup.add(line);
+    }
     
-    return tile;
+    return tileGroup;
 }
 
 function getTilePosition(cellSize, boardColsCount, tileColsCount, index) {
    return cellSize * (-boardColsCount + tileColsCount) / 2 + index * cellSize;
 }
 
+/*
 function createFilledBoard(cellSize, colsCount, pattern) {
     const board = createBoard(cellSize, colsCount, false);
     let x = -cellSize * colsCount / 2 + cellSize / 2;
@@ -100,6 +111,7 @@ function createFilledBoard(cellSize, colsCount, pattern) {
     }
     return board;
 }
+    */
 
 function getAllConfigurations(n) {
     if(n<2) {
@@ -121,16 +133,23 @@ class TilingSlide extends Slide {
     initialize() {
     }
     start() {
+        let mainGroup = this.mainGroup;
 
-        this.mainBoard = createBoard(50, 8, true);
-        this.mainBoard.position.set(center.x, 100);
+        let mainBoard = this.mainBoard = createBoard(50, 8, true);
+        mainGroup.add(mainBoard);
+        mainBoard.position.set(0, -100);
+
         this.mainBoardTiles = [];
+
+        let pooly = -450;
+
         let tile1 = this.tile1Pool = createTile(50, 1);
-        tile1.position.set(50, two.height - 50);
+        mainGroup.add(tile1);
+        tile1.position.set(-200, pooly);
         
         let tile2 = this.tile2Pool = createTile(50, 2);
-        tile2.position.set(150, two.height - 50);
-
+        mainGroup.add(tile2);
+        tile2.position.set(-100, pooly);
         /*
         let cellSize = 20;
         const textStyle = { 
@@ -180,47 +199,68 @@ class TilingSlide extends Slide {
         }
     }
 
+    getColumnPos(n) {
+        return {x:-600 + (n-1) * 50 + n*(n+1)/2 * 30, y:-300};
+    }
+
     act2() {
         if( this.mainBoard.visible) {
             this.mainBoard.visible = false;
             return;
         }
         if(this.count==0) this.count = 1;
-        let n = this.count;
-        let x = 100 + (n-1) * 50 + n*(n+1)/2 * 30;
-
-        this.foobar(this.count, x, 100);
-        this.count++;
+        else if(this.count >= 8) {
+            this.highlightRectangles();
+        } else {
+            let n = this.count;
+            let p = this.getColumnPos(n);
+            this.addColumn(this.count, p.x, p.y);
+            this.count++;
+        }
     }
 
-    foobar(n, x0, y0) {
-        let cellSize = 30;
+    addColumn(n, x0, y0) {
+        let cellSize = CELLSIZE;
         let configs = getAllConfigurations(n);
         let tl = gsap.timeline();
         let y = y0;
+        const fast = n>4;
+        const rowDelay = fast ? 0.05 : 0.1;
         for(let i=0;i<configs.length;i++) {
             let b = createBoard(cellSize, n);
+            this.mainGroup.add(b);
             this.uffa.push(b);
             b.position.set(x0, y);
             b.opacity = 0;
-            tl.to(b, {duration:0.1, opacity:1});
-            tl.add(this.fillMain(b, configs[i]));
-            y += 35;
+            tl.to(b, {duration:fast ? 0.01 :0.1, opacity:1}, rowDelay*i);
+            tl.add(this.fillMain(b, configs[i], fast), rowDelay*i);
+            y += ROWSIZE;
         }
-        let txt = two.makeText(`${configs.length}`,
-            x0, y0 - 50,{size:50, fill:'white', weight:'bold'});
-        txt.opacity = 0;
-        tl.to(txt, {duration:0.5, opacity:1});
-        this.uffa.push(txt);
+        let txt1 = two.makeText(`n=${n}`,
+            x0, y0 - 50,{size:20, fill:'white', weight:'bold'});
+        this.mainGroup.add(txt1);
+        
+        let m = configs.length;
+
+        let txt2 = two.makeText(`${m}`,
+            x0, y0 + 50 + ROWSIZE * m, {size:50, fill:'orange', weight:'bold'});
+        this.mainGroup.add(txt2);
+
+        txt2.opacity = 0;
+        tl.to(txt2, {duration:0.5, opacity:1});
+        this.uffa.push(txt2);
+
+
     }
 
   
-    fillMain(board, pattern) {
+    fillMain(board, pattern, fast = false) {
         let tl = gsap.timeline();
         board.userData.tiles.forEach(t => t.remove());
         board.userData.tiles = [];
         const cellSize = board.userData.cellSize;
         let k = 0;
+        const unitaryDelay = fast ? 0.01 : 0.125;
         for(let i=0; i<pattern.length; i++) {
             let c = pattern[i];
             let tileColsCount = c=="1" ? 1 : 2;
@@ -233,12 +273,49 @@ class TilingSlide extends Slide {
             let x = getTilePosition(cellSize, board.userData.colsCount, tileColsCount, k);
             tl.to(tile.position, {
                 duration: 0.5,
-                delay: i * 0.125,
+                delay: i * unitaryDelay,
                 x: x, y: 0
             }, 0);
             k += tileColsCount;
         } 
         return tl;
+    }
+
+    setHighlightingRectangle(rect, n, ty) {
+        const fibs = [1,1,2,3,5,8,13,21,34,55];
+        const cellSize = CELLSIZE;
+        let p = this.getColumnPos(n);
+        let x0 = p.x - n * cellSize / 2 + ty * cellSize;
+        let x1 = p.x + n * cellSize / 2;
+        let y0 = p.y - cellSize / 2;
+        if(ty==2) y0 += ROWSIZE * fibs[n-1];
+        let m;
+        if(ty==0) m = fibs[n];
+        else if(ty == 1) m = fibs[n-1];
+        else m = fibs[n-2];
+        let y1 = y0 + ROWSIZE * (m-1) + CELLSIZE;
+        
+        rect.position.set((x0 + x1)/2, (y0 + y1)/2);
+        rect.width = x1 - x0;
+        rect.height = y1 - y0;
+    }
+    highlightRectangles() {
+        let rects = [];
+        let colors = ['red','red','orange','orange'];
+        for(let i=0;i<4;i++) {
+            let rect = two.makeRectangle();
+            rect.fill = 'none';
+            rect.stroke = colors[i];
+            rect.linewidth = 6;
+            rects.push(rect);
+            this.mainGroup.add(rect);
+        }
+        this.setHighlightingRectangle(rects[0], this.count-1, 1);
+        this.setHighlightingRectangle(rects[1], this.count-2, 0);
+        this.setHighlightingRectangle(rects[2], this.count-1, 2);
+        this.setHighlightingRectangle(rects[3], this.count-3, 0);
+
+        
     }
 }
 

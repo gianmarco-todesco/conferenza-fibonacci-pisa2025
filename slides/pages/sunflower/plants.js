@@ -10,10 +10,10 @@ class PlantsSlide extends Slide {
         let mainGroup = two.makeGroup();
         mainGroup.position.set(center.x, center.y);
         this.mainGroup = mainGroup; 
-        this.addImage('/slides/assets/daisy.jpg', -200, 0, 0.125);
-        this.addImage('/slides/assets/pinecone.jpg', 0, 0, 0.25);
-        this.addImage('/slides/assets/sunflower-1.png', 200, 0, 0.25);
-        this.addImage('/slides/assets/broccolo.jpg', 200, 300, 0.25);
+        this.addImage('/slides/assets/daisy.jpg', -350, 0, 0.5);
+        this.addImage('/slides/assets/sunflower-1.png', 500, 150, 0.75);
+        this.addImage('/slides/assets/broccolo.jpg', -700, 300, 0.3);
+        this.addImage('/slides/assets/pinecone.jpg', 550, -250, 0.5);
     }
 
     addImage(path, x, y, scale) {

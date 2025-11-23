@@ -180,4 +180,24 @@ document.addEventListener('pointerdown', (e)=>{
 
 
 
-export {Slide, two, center, nextSlide};
+
+class TextLine {
+    constructor(texts, style, margin) {
+        this.group = two.makeGroup();
+        this.texts = texts.map(t => two.makeText(t, 0, 0, style));
+        this.texts.forEach(t => this.group.add(t));        
+        this.margin = margin || 50;
+    }
+    update() {
+        two.update();
+        let x = 0;
+        this.texts.forEach((item)=>{
+            let cr = item.getBoundingClientRect();
+            item.position.x = x + cr.width/2;
+            x += cr.width + this.margin;
+        });
+    }
+}
+
+
+export {Slide, two, center, nextSlide, TextLine};
