@@ -1,6 +1,6 @@
-import {Slide, two, center} from '../../libs/gmtlib.js';   
+import {Slide, two, center, TextLine} from '../../libs/gmtlib.js';   
 
-
+/*
 class TextLine {
     constructor(texts, style) {
         this.group = two.makeGroup();
@@ -17,6 +17,7 @@ class TextLine {
         });
     }
 }
+*/
 
 class TwoSquaresSumSlide extends Slide {
     constructor() {
@@ -41,11 +42,6 @@ class TwoSquaresSumSlide extends Slide {
             "F_{k}^2 + F_{k+1}^2 = ?",  // F_{k} \\cdot F_{k+1}
                 div, { throwOnError: false });
 
-
-
-        let line = two.makeGroup();
-        mainGroup.add(line);
-
         const textSytle = {
             size: 60,
             family: 'Arial',
@@ -53,14 +49,14 @@ class TwoSquaresSumSlide extends Slide {
             weight: 550
         };
         let fibs = [1,1];
-        for(let i=0; i<11; i++) fibs.push(fibs[i]+fibs[i+1]);
-        let textLines = [];
-        let fibTextLine = new TextLine(fibs.map(i => `${i}`), textSytle);
+        for(let i=0; i<13; i++) fibs.push(fibs[i]+fibs[i+1]);
+        let textLines = this.textLines = [];
+        let fibTextLine = new TextLine(fibs.map(i => `${i}`), textSytle, 50);
         textLines.push(fibTextLine);
         mainGroup.add(fibTextLine.group);
-        fibTextLine.group.position.set(-300,-100);
+        fibTextLine.group.position.set(-800,-200);
         
-        for(let i=3; i<10; i++) {
+        for(let i=0; i<7; i++) {
             let a = fibs[i], b = fibs[i+1];
             let a2 = a*a, b2 = b*b;
             let s = a2 + b2;    
@@ -70,11 +66,22 @@ class TwoSquaresSumSlide extends Slide {
             let sumTextLine = new TextLine(ts, textSytle);
             textLines.push(sumTextLine);
             mainGroup.add(sumTextLine.group);
-            sumTextLine.group.position.set(fibTextLine.group.position.x, (i-2)*60);
+            sumTextLine.group.position.set(fibTextLine.group.position.x, i*70);
         }
         two.update(); // per ottenere le dimensioni
         textLines.forEach(tl => tl.update());
 
+        this.hlRects = [];
+        for(let i=0;i<4;i++) {
+            let rect = two.makeRectangle();
+            rect.fill = 'none';
+            rect.stroke = 'red';
+            rect.linewidth = 4;
+            mainGroup.add(rect);
+            this.hlRects.push(rect);
+            rect.visible = false;
+        }
+        this.index = -1;
     }
     cleanup() {
         this.mainGroup.remove();
@@ -83,6 +90,47 @@ class TwoSquaresSumSlide extends Slide {
     async end() {
  
     }
+
+    setHlRect(rect, textLine, i0, i1) {
+        let offx = textLine.group.position.x;
+        let offy = textLine.group.position.y;
+        let x0 = offx + textLine.texts[i0].position.x - textLine.texts[0].getBoundingClientRect().width/2;
+        let y0 = offy + textLine.texts[i0].position.y - textLine.texts[0].getBoundingClientRect().height/2;
+        let x1 = offx + textLine.texts[i1].position.x + textLine.texts[i1].getBoundingClientRect().width/2;
+        let y1 = offy + textLine.texts[i1].position.y + textLine.texts[i1].getBoundingClientRect().height/2;
+        
+        let d = 0;
+        if(i0>10) d = 20;
+        rect.position.set((x0+x1)/2 - d/2, (y0+y1)/2-5);
+        rect.width = x1 - x0 + 30 + d;
+        rect.height = y1 - y0 + 20;
+        rect.visible = true;
+    } 
+
+    selectSum(i) {
+        let textLine = this.textLines[i+1];
+        this.setHlRect(this.hlRects[0], textLine, 0, textLine.texts.length-1);
+        textLine = this.textLines[0];
+        this.setHlRect(this.hlRects[1], textLine, i, i);
+        this.setHlRect(this.hlRects[2], textLine, i+1, i+1);
+        let k = i*2+1;
+        this.setHlRect(this.hlRects[3], textLine, k+1, k+1);        
+    }
+
+    nextAct() {
+        if(this.index<=5) {
+            this.index++;
+            this.selectSum(this.index);
+        }
+    }
+    prevAct() {
+        if(this.index>=0) {
+            this.index--;
+            if(this.index>=0) this.selectSum(this.index);
+            else this.hlRects.forEach(r => r.visible = false);
+        }
+    }
+
 }
 
 let t = new TwoSquaresSumSlide();

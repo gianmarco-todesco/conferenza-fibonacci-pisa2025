@@ -22,34 +22,16 @@ function getDistance(a,b) {
     return norm( subtract(a,b) );
 }
 
-function insort(arr, item, compare) {
-    if(arr.length === 0 || compare(item, arr[arr.length-1]) > 0) {
-        arr.push(item);
-    } else if(compare(item, arr[0]) < 0) {  
-        arr.splice(0,0,item);
-    } else {    
-        let lo = 0, hi = arr.length;
-        while(lo < hi) {
-            let mid = (lo + hi) >>> 1;
-            if(compare(item, arr[mid]) < 0) hi = mid;
-            else lo = mid + 1;
-        }
-        arr.splice(lo, 0, item);
-    }   
-    return arr;
-}
-
 
 class SunFlower1 extends Slide {
     constructor() {
         super("SunFlower");
         this.dtheta = 1/3;
-        
+        this.ballPeriod = 0.1; // quanti secondi fra due palle successive
     }  
 
     makeGun() {
         let gunGroup = this.gunGroup = two.makeGroup();
-        
         let gun = two.makeCircle(0,0, 8);
         gun.fill = 'yellow';
         gun.stroke = 'orange';
@@ -63,27 +45,30 @@ class SunFlower1 extends Slide {
     }
 
     start() {
-        this.mainGroup = two.makeGroup();
-        this.mainGroup.position.set(center.x,center.y);
+        this.mainGroup = this.mainGroup;
         this.makeGun();
+        this.speed = 0.001;
+        this.currentTime = 0.0;
 
 
         let balls = this.balls = [];
-        let t = 0;
-    
-        let theta = this.theta = 0.0;
-        let dtheta = this.dtheta = 2*Math.PI / 3;
-        let theta1 = this.theta1 = theta + dtheta;
-        const r0 = this.r0 = 18.0;
-        this.ticker = this.update.bind(this);
-        const me = this;
-        function ticker(time, deltaTime) {
-            // console.log("ticker:", time);
-            if(me.ticker) me.update(time, deltaTime); 
+        let n = 1000;
+        for(let i=0;i<n;i++) {
+            let ball = two.makeCircle(0,0, 3);
+            ball.fill = 'white';
+            ball.stroke = 'yellow';
+            ball.linewidth = 1;
+            ball.userData = {
+                t: i * this.ballPeriod
+            };
+            this.mainGroup.add(ball);
+            ball.visible = false;
+            balls.push(ball)
         }
-        gsap.ticker.add(ticker);
-        this.ticker = ticker;
-
+        this.alpha = 1/3;
+        
+        this.r0 = 18.0;
+        
         let div = this.div = document.createElement('div');
         div.style.position = 'absolute';
         div.style.width = '400px';
@@ -98,15 +83,13 @@ class SunFlower1 extends Slide {
         //    throwOnError: false
         //});
         this.updateAlphaDisplay("\\frac{1}{3}");
+        
+        // this.mainGroup.scale = 5
+
     }
     async end() {
     }
     cleanup() {
-        if(this.ticker) {
-            gsap.ticker.remove(this.ticker);
-            this.ticker = null;
-        }
-        this.mainGroup.remove();
         this.div.remove();
     }
 
@@ -118,16 +101,23 @@ class SunFlower1 extends Slide {
 
     set alpha(alpha) {
         this._alpha = alpha;
-        this.balls.forEach( b=>b.remove());
-        this.balls = [];
-        this.dtheta = alpha * Math.PI * 2.0;
-        this.theta = 0.0;
-        this.theta1 = this.theta + this.dtheta;
+        let dtheta = this.dtheta = alpha * Math.PI * 2.0;
+        
+        let period = this.ballPeriod;
+        this.balls.forEach( (b,i) => {
+            b.t = period * i;
+            let psi = dtheta * i;
+            b.userData.cs = Math.cos(psi);
+            b.userData.sn = Math.sin(psi);
+        });
+        this.theta = 0;
+        this.currentTime = 0;
     }
-    get angleIncrement() {
+    get alpha() {
         return this._alpha;
     }
 
+    /*
     fire(time) {
         t = time;
         let phi = this.theta1;
@@ -146,20 +136,26 @@ class SunFlower1 extends Slide {
         this.mainGroup.add(ball);
         this.balls.push(ball);
     }
+        */
 
     update(time, deltaTime) {
+        let currentTime = this.currentTime += this.speed * deltaTime;
         this.balls.forEach( b => {
-            let age = time - b.userData.t;
-            let cs = b.userData.cs;
-            let sn = b.userData.sn;
-            let r = this.r0 + Math.sqrt(age) * 20;
-            b.position.x = cs * r;
-            b.position.y = sn * r;
+            let age = currentTime - b.userData.t;
+            if(age<0.0) b.visible = false;
+            else {
+                b.visible = true;
+                let cs = b.userData.cs;
+                let sn = b.userData.sn;
+                if(cs !== undefined) {
+                    let r = this.r0 + Math.sqrt(age) * 60;
+                    b.position.x = cs * r;
+                    b.position.y = sn * r;
+
+                }
+            }
         });
-        this.theta += 0.005 * deltaTime;
-        if(this.theta > this.theta1 && this.balls.length  < 5000) {
-            this.fire(time);
-        }
+        this.theta = currentTime * this.dtheta / this.ballPeriod;
         this.gunGroup.rotation = this.theta;
     }
 
@@ -184,6 +180,12 @@ class SunFlower1 extends Slide {
         } else if(event.key === '6') {
            this.alpha = 2/(1 + Math.sqrt(5))       
            this.updateAlphaDisplay("\\frac{1}{\\phi}"); 
+        } else if(event.key == '+') {
+            let newSpeed = 5*this.speed;
+            gsap.to(this, {speed:newSpeed, duration:1});
+        } else if(event.key == '-') {
+            let newSpeed = (1/5)*this.speed;
+            gsap.to(this, {speed:newSpeed, duration:1});
         }
     }
     nextAct() {

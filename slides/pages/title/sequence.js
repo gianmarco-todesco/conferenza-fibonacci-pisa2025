@@ -27,7 +27,7 @@ class SequenceSlide extends Slide {
 
         // build fibonacci sequence
         let fibs = [1,1];
-        for(let i=0; i<20; i++) 
+        for(let i=0; i<30; i++) 
             fibs.push(fibs[i]+fibs[i+1]);
 
         const textStyle = this.textStyle = {
@@ -160,7 +160,7 @@ class SequenceSlide extends Slide {
             case 1: this.fourNumbers(); break;
             case 2: this.firstAddition(); break;
             case 3: this.secondAddition(0); break;
-            case 4: this.secondAddition(1, 15); break;
+            case 4: this.secondAddition(1, 1000); break;
             case 5: this.showPicture1(); break;
             case 6: this.showPicture2(); break;
         }
@@ -209,8 +209,8 @@ class SequenceSlide extends Slide {
         plus.fill = equal.fill = 'blue';
         plus.opacity = equal.opacity = 0;
         plus.visible = equal.visible = true;
-        gsap.to(plus, {duration:1, opacity:1});
-        gsap.to(equal, {duration:1, opacity:1});
+        gsap.to(plus, {duration:0.5, opacity:1});
+        gsap.to(equal, {duration:0.5, opacity:1});
         gsap.to(txts, {fill:'blue'});
     }
     secondAddition(i0, m = 1) {
@@ -230,19 +230,19 @@ class SequenceSlide extends Slide {
             const x1 = computeXBetween(txts[i+2], txts[i+3]);
             let t = "ta"+i;
             tl.to(txts[i], {fill:'cyan', duration:1}, t);
-            tl.to([plus, equal], {opacity:0, duration:1, 
+            tl.to([plus, equal], {opacity:0, duration:0.25, 
                 onComplete() {
                     plus.position.x = x0;
                     equal.position.x = x1;
                 }},t);
-            tl.to([plus, equal], {duration:0.5, opacity:1, stagger:0.5});
-            tl.to(txts[i+3], {duration:0.5, fill:'blue', opacity:1});
+            tl.to([plus, equal], {duration:0.5, opacity:1, stagger:0.125});
+            tl.to(txts[i+3], {duration:0.25, fill:'blue', opacity:1}, t + "+0.01");
 
             let w = txts[i+3].userData.x + txts[i+3].getBoundingClientRect().width;
             let sc = this.numbers.scale;
             if(this.numbers.position.x + w * sc > two.width / 2) {
                 let newX = two.width/2 - w * sc;
-                tl.to(this.numbers.position, {duration:1, x: newX}, t); 
+                tl.to(this.numbers.position, {duration:0.5, x: newX}, t); 
             }
 
         }

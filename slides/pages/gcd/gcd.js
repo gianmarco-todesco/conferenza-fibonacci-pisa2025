@@ -93,6 +93,24 @@ class Board {
             board.add(element);
         });
 
+        // quote
+
+
+        if(colsCount == rowsCount) {
+            let r = (right-left)/2;
+            let circle = two.makeCircle((left+right)/2, (top+bottom)/2, r);
+            circle.fill = 'none';
+            board.add(circle);
+            let txt = two.makeText(`${colsCount}`, (left+right)/2, (top+bottom)/2, { size: 20, color:'black'});
+            board.add(txt);
+        } else {
+            let txt = two.makeText(`${colsCount}`, (left+right)/2, bottom - 10, { size: 20, color:'black'});
+            board.add(txt);
+            txt = two.makeText(`${rowsCount}`, left + 15, (top+bottom)/2, { size: 20, color:'black'});
+            board.add(txt);
+
+        }
+
         // bordo (disegnato per ultimo così sta sopra la griglia)
         const border = two.makeRoundedRectangle(
             0, 0, width+1, height+1, borderRadius);
@@ -244,13 +262,21 @@ class GcdSlide extends Slide {
     }
 
     setBoard(cellSize, rows, cols) {
+        let mainGroup = this.mainGroup;
+
+        let txt = two.makeText("Algoritmo Euclideo", 0, -500, {size:50, fill:'white'});
+        mainGroup.add(txt);
+
         if(this.board) {
             this.board.dispose();
             this.board = null;
         }
         let board = this.board = new Board(cellSize, rows, cols); 
         this.currentBoard = board;
-        board.group.position.set(center.x, center.y);
+        board.group.position.set(center.x, center.y)
+
+        
+        // mainGroup.add(board.group);
         board.updateChildrenPosition();
     }
     start() {
@@ -272,6 +298,8 @@ class GcdSlide extends Slide {
             this.setBoard(20, 3*7, 3*12);
         } else if(event.key === "2") {
             this.setBoard(20, 21, 34);
+        } else if(event.key === "3") {
+            this.setBoard(20, 27, 36);
         }
         else if(event.key === "s") {
             if(this.currentBoard) {

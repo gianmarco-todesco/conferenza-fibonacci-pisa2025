@@ -8,12 +8,15 @@ class TitleSlide extends Slide {
     }
     start() {
         let mainGroup = this.mainGroup;
+        let bg = two.makeSprite('/slides/assets/title-bg.jpg');
+        mainGroup.add(bg);
+        bg.scale = 2;
         let title = this.title = two.makeText(
             'Fibonacci', 
             0,-150, {
                 size: 200, 
                 family: 'Arial', 
-                fill: 'white',
+                fill: 'black',
                 // stroke: 'black',
                 linewidth: 2.0,
                 weight: 'bold'
@@ -21,15 +24,15 @@ class TitleSlide extends Slide {
         mainGroup.add(title);
         let subtitle = this.title = two.makeText(
             'Numeri fantastici e dove trovarli', 
-            0,0, {size: 60, 
+            0,50, {size: 110, 
                 family: 'Arial', 
-                fill: 'white', 
+                fill: 'black', 
                 weight: 'bold'
         });
         mainGroup.add(subtitle);
         let contact = this.contact = two.makeText(
             'Gian Marco Todesco - gianmarco.todesco@gmail.com',
-            0,120, {size: 35, family: 'Arial', fill: '#BBB', weight: 'bold'
+            0,450, {size: 50, family: 'Arial', fill: '#111', weight: 'bold'
         });
         mainGroup.add(contact);
 

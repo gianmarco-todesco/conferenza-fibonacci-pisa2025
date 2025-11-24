@@ -44,13 +44,16 @@ class RabbitsSlide extends Slide {
         // this.updateLayoutTicker = gsap.ticker.add(this.updateLayout.bind(this));
         this.createPanel();
         if(!this.areRabbits) {
-            this.title = two.makeText("Mitosi cellulare", 0, -450, {
+            let x = this.mainGroup.position.x;
+            let y = this.mainGroup.position.y;    
+            this.title = two.makeText("Mitosi cellulare", x, y-450, {
                 size: 80,
                 family: 'Arial',
                 fill: 'white',
                 weight: 'bold'
             });
-            this.mainGroup.add(this.title);
+            
+            // this.mainGroup.add(this.title);
         }
     }
 
@@ -134,6 +137,10 @@ class RabbitsSlide extends Slide {
             this.layout.dispose();
             this.layout = null;
         }        
+        if(this.title) {
+            this.title.remove();
+            this.title = null;
+        }
         this.table.remove();
     }
     async end() {

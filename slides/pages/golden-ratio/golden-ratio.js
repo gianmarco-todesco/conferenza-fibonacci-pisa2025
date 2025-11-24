@@ -25,15 +25,48 @@ class GoldenRatioSlide extends Slide {
         mainDiv.style.color = 'white';
         mainDiv.style.verticalAlign = 'middle';
         mainDiv.style.textAlign = 'center';
+        mainDiv.style.display = 'flex';
+        mainDiv.style.flexDirection = 'column';        
+
+        let title = document.createElement('h1');
+        title.innerText = "La sezione aurea";
+        mainDiv.appendChild(title);
+
+        let div4 = document.createElement('div');
+        div4.style.margin = '50px';
+        mainDiv.appendChild(div4);
+        katex.render(
+            "\\varphi = \\frac{1+\\sqrt{5}}{2} = 1.618033988749895...", 
+                div4, { throwOnError: false });
+        
+        let div5 = document.createElement('div');
+        mainDiv.appendChild(div5);
+        katex.render(
+            "1+\\varphi = \\varphi^2 \\ ", 
+                div5, { throwOnError: false });
+
 
         let fibs = [1,1];
         for(let i=0; i<30; i++) 
             fibs.push(fibs[i]+fibs[i+1]);
 
+        let topRow = document.createElement('div');
+        mainDiv.appendChild(topRow);
+        topRow.style.fontSize = '80px';
+        topRow.style.width = '100%';
+        topRow.style.height = '400px';
+        topRow.style.display = 'flex';        
+        topRow.style.flexDirection = 'row';
+        topRow.style.alignItems = 'center';
+        topRow.style.justifyContent = 'center';    
 
-        let div1 = createDiv('20px', '20px', '100px', '50px', mainDiv);
-        let div2 = createDiv('120px', '20px', '250px', '50px', mainDiv);
-        let div3 = createDiv('390px', '20px', '600px', '50px', mainDiv);
+        let div1 = document.createElement('div');
+        topRow.appendChild(div1);
+        let div2 = document.createElement('div');
+        topRow.appendChild(div2);
+        let div3 = document.createElement('div');
+        topRow.appendChild(div3);
+        
 
         let i = 12;
         const ck = "1.618033988749895";
@@ -64,19 +97,11 @@ class GoldenRatioSlide extends Slide {
 
         }, 1000)
 
-        let y = 200; let h = 120;
-        let div4 = createDiv('20px', `${y}px`, '960px', `${h}px`, mainDiv);
-        katex.render(
-            "\\varphi = \\frac{1+\\sqrt{5}}{2} = 1.618033988749895...", 
-                div4, { throwOnError: false });
-        y+=h;
-        let div5 = createDiv('20px', `${y}px`, '960px', `${h}px`, mainDiv);
-        katex.render(
-            "1+\\varphi = \\varphi^2 \\ ", 
-                div5, { throwOnError: false });
+        
+        
 
-        y+=h;
-        let div6 = createDiv('20px', `${y}px`, '960px', `${h}px`, mainDiv);
+        let div6 = document.createElement('div');
+        mainDiv.appendChild(div6);
         katex.render(
             "\\frac{F_{n+1}}{F_{n}} \\xrightarrow[n \\to \\infty]{} \\varphi", 
                 div6, { throwOnError: false });
