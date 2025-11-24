@@ -20,6 +20,60 @@ class TextLine {
 }
 */
 
+
+function createTile(cellSize, rowsCount) {
+    // Parametri configurabili
+    const unit = cellSize/40.0;
+    const borderRadius = 6 * unit;   // angoli arrotondati del bordo
+    const borderWidth = 2 * unit;     // spessore del bordo
+    const bgColor = rowsCount==1 ? 'rgb(42, 152, 221)' : 'rgb(200, 215, 35)';      // sfondo opaco
+    const gridColor = 'rgb(50, 87, 100)';       // colore griglia molto sottile
+    const borderColor = 'rgb(0,100,0)';  
+    const gridLineWidth = 0.8;
+
+    // dimensioni totali del rettangolo
+    const width = cellSize;
+    const height = rowsCount * cellSize;
+
+    // sfondo arrotondato (disegnato prima)
+    const tileGroup = two.makeGroup();
+    const tile = two.makeRoundedRectangle(
+        0, 0, width-borderWidth, height-borderWidth, borderRadius);
+    tile.fill = bgColor;
+    tile.stroke = borderColor;
+    tile.linewidth = borderWidth;
+    tileGroup.add(tile);
+    if(rowsCount == 2) {
+        const line = two.makeLine(-width/2, 0, -width/2, 0);
+        line.stroke = gridColor;
+        line.linewidth = gridLineWidth;
+        tileGroup.add(line);
+    }
+    
+    return tileGroup;
+}
+
+function getPatterns(n) {
+    if(n==0) return [[]];
+    else if(n==1) return [[1]];
+    else if(n==2) return [[2],[1,1]];
+
+    let lst = [];
+    for(let i=n-2;i>=0;i--) {
+        let prefix = [];
+        for(let j=0;j<i;j++) prefix.push(1);
+        prefix.push(2);
+        let subpatterns = getPatterns(n - 2 - i);
+        for(let j=0; j<subpatterns.length; j++) {
+            lst.push(prefix.concat(subpatterns[j]));    
+        }
+    }
+    let pattern = [];
+    for(let j=0;j<n;j++) pattern.push(1);
+    lst.push(pattern);
+    return lst;
+} 
+
 class FibonacciSumSlide extends Slide {
     constructor() {
         super("FibonacciSum");
@@ -107,7 +161,9 @@ class FibonacciSumSlide extends Slide {
         textLines.forEach((textLine,i)=>{
             tl.to(textLine.texts, {opacity:1, duration:0.3, stagger:0.1}, i*0.5);
         });
-        
+        this.tiles = [];
+        this.fooRects = [];
+        this._state = 0;
         // textLines.forEach(textLine => { textLine.texts.forEach(t => t.opacity=1); });
     }
     cleanup() {
@@ -141,14 +197,82 @@ class FibonacciSumSlide extends Slide {
             textLine.group.position.y);
     }
     async end() {
- 
     }
+
+    
+
+    foo(n) {
+        let tl = gsap.timeline();
+        let keptLine = null;
+        for(let i=1;i<this.textLines.length;i++) {
+            if(i != 4) this.textLines[i].group.visible = false;
+            else {
+                let keptLine = this.textLines[i];
+                keptLine.old_y = keptLine.group.position.y;
+                //tl.to(keptLine.group.position, {y: -100, duration: 1});
+            }
+        }
+        this.tiles.forEach(t => t.remove());
+        this.tiles = [];
+        this.fooRects.forEach(r => r.remove());
+        this.fooRects = [];
+
+        const tileSize = 25;
+        let patterns = getPatterns(n);
+        console.log(patterns.length)
+        for(let i=0; i<patterns.length;i++) {
+            let pattern = patterns[i];
+            let x = -800 + 60 * i;
+            let y = 200;
+            for(let j=0; j<pattern.length; j++) {
+                let m = pattern[j];
+                let tile = createTile(tileSize,m);            
+                this.mainGroup.add(tile);
+                tile.position.set(x, y + (m*tileSize)/2);
+                this.tiles.push(tile);
+                y += m * tileSize;
+                tile.opacity = 0;                    
+            }
+        }
+
+        tl.to(this.tiles, {opacity:1, duration:0.5, stagger:0.01});
+        const fibs = [1,1,2,3,5,8,13,21,34,55,89,144,233];
+        let t = 0;
+        for(let i=0;i<n-1;i++) {
+            let rect = two.makeRectangle();
+            rect.fill = 'none';
+            rect.stroke = 'white';
+            rect.linewidth = 3; 
+            this.mainGroup.add(rect);
+            let x0 = -800 + 60 * t;
+            let x1 = x0 + 60 * (fibs[i]);
+            let y0 = 200 + tileSize * (n-i);
+            let y1 = 200 + tileSize * n + tileSize/2;
+            rect.position.set((x0 + x1)/2-30, (y0+y1)/2);
+            rect.width = x1 - x0;
+            rect.height = y1-y0;
+            t += fibs[i];
+            this.fooRects.push(rect);
+            rect.opacity = 0;
+        }
+    }
+
+    foo2() {
+        if(this.fooRects.length == 0) return;
+        let tl = gsap.timeline();
+        tl.to(this.fooRects, {opacity:1, duration:0.5, stagger:0.1});
+    }
+
 
     onKeyDown(event) {
         if('1'<=event.key && event.key <= '9') {
             this.selectSum(parseInt(event.key)+2);
         } else if(event.key === '0') {
             this.highlightItems.forEach(r => r.visible = false);
+        } else if(event.key === 'f') {
+            this.foo(7);
+        } else if(event.key === 'g') {
+            this.foo2();
         }
     }
 }
